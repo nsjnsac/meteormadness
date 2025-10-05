@@ -28,12 +28,13 @@
   html, body { height: 100%; margin: 0; background: var(--bg-dark); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: var(--text-primary); overflow: hidden; }
   #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
   canvas { display: block; }
-  .ui-panel { position: absolute; z-index: 10; background: var(--panel-bg); backdrop-filter: blur(6px); border-radius: 12px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border-color); }
+  .ui-panel { position: absolute; z-index: 10; background: var(--panel-bg); backdrop-filter: blur(6px); border-radius: 12px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border-color); transition: all 0.3s ease-out; }
   #controls-panel { top: 15px; left: 15px; width: 380px; }
   #info-panel { top: 15px; right: 15px; width: 380px; max-height: calc(100% - 40px); overflow-y: auto; }
   #info-panel.hidden { display: none; }
   .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
-  h1 { font-size: 20px; margin: 0 0 16px 0; color: var(--text-primary); }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  h1 { font-size: 20px; margin: 0; }
   h2 { font-size: 16px; margin: 16px 0 8px 0; color: var(--accent); border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
   .row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
   .row label { min-width: 70px; color: var(--text-muted); font-size: 14px; }
@@ -54,111 +55,82 @@
   #status-message { font-size: 12px; color: var(--text-muted); margin-top: 10px; height: 16px; transition: opacity 0.5s; }
   #impact-alert { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 0, 0, 0.8); color: white; padding: 20px; border-radius: 10px; z-index: 100; display: none; text-align: center; font-size: 1.5em; white-space: pre; }
   
-  /* *** NUEVO: Estilos para el Pop-up *** */
-  .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    display: none; /* Oculto por defecto */
-    justify-content: center;
-    align-items: center;
-  }
-  .popup-content {
-    position: relative;
-    background: var(--panel-bg);
-    padding: 25px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    width: 90%;
-    max-width: 700px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-  }
-  .popup-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 24px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 5px;
-  }
-  .popup-content h1 {
-    color: var(--accent);
-    margin-top: 0;
-    font-size: 1.5em;
-  }
-  .popup-content h2 {
-    font-size: 1.1em;
-    color: var(--text-primary);
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 10px;
-  }
-  .popup-content p {
-    font-size: 0.9em;
-    line-height: 1.6;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-  }
-  .popup-content small {
-    font-size: 0.8em;
-    color: var(--text-muted);
-    opacity: 0.7;
-  }
-  .popup-divider {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 20px 0;
+  .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; }
+  .popup-content { position: relative; background: var(--panel-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); width: 90%; max-width: 700px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+  .popup-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; line-height: 1; padding: 5px; }
+  .popup-content h1 { color: var(--accent); margin-top: 0; font-size: 1.5em; }
+  .popup-content h2 { font-size: 1.1em; color: var(--text-primary); border-bottom: none; padding-bottom: 0; margin-bottom: 10px; }
+  .popup-content p { font-size: 0.9em; line-height: 1.6; color: var(--text-muted); margin-bottom: 10px; }
+  .popup-content small { font-size: 0.8em; color: var(--text-muted); opacity: 0.7; }
+  .popup-divider { border: none; border-top: 1px solid var(--border-color); margin: 20px 0; }
+
+  /* *** NUEVO: Estilos para Menú Plegable *** */
+  #menu-toggle-btn {
+    display: none;
+    font-size: 20px;
+    padding: 4px 10px;
   }
 
-  @media (max-width: 800px) { .ui-panel { width: calc(100% - 30px); } #info-panel { top: auto; bottom: 15px; right: 15px; } }
+  @media (max-width: 800px) {
+    .ui-panel { width: calc(100% - 30px); }
+    #info-panel { top: auto; bottom: 15px; right: 15px; }
+    #menu-toggle-btn { display: block; }
+    #controls-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-top: -16px; /* Compensa el margin-bottom del header */
+    }
+    #controls-panel.expanded #controls-content {
+      max-height: 500px; /* Valor suficientemente grande */
+      padding-top: 16px;
+      margin-top: 0;
+    }
+  }
 </style>
 </head>
 <body>
 
   <div id="canvas-container"></div>
   <div id="controls-panel" class="ui-panel">
-    <h1>Visor de Órbitas NEO</h1>
-    <div class="row">
-      <input id="api-key-input" type="text" placeholder="Pega tu clave de API de la NASA aquí">
-      <button id="load-neos-btn">Cargar NEOs Recientes</button>
+    <div class="panel-header">
+      <h1>Visor de Órbitas NEO</h1>
+      <button id="menu-toggle-btn">☰</button>
     </div>
-    <div id="status-message"></div>
-    <hr style="border:none; border-top:1px solid var(--border-color); margin: 16px 0;"/>
-    <div class="row">
-      <label>Velocidad</label>
-      <button class="time-btn" data-scale="1">1x</button>
-      <button class="time-btn" data-scale="5">5x</button>
-      <button class="time-btn" data-scale="10">10x</button>
-      <button class="time-btn" data-scale="20">20x</button>
-      <button class="time-btn" data-scale="100">100x</button>
-    </div>
-    <div class="row">
-      <label>Control</label>
-      <button id="resume-btn" title="Reanudar">▶</button>
-      <button id="pause-btn" title="Pausar">||</button>
-    </div>
-    <div class="row">
-      <label for="date-picker">Ir a Fecha</label>
-      <input type="date" id="date-picker">
-      <button id="go-to-date-btn">Ir</button>
-    </div>
-    <div class="row">
-        <label for="neo-selector">Ir a NEO</label>
-        <select id="neo-selector">
-            <option value="">Selecciona un NEO</option>
-        </select>
-        <button id="go-to-neo-btn">Ir</button>
+    <div id="controls-content">
+      <div class="row">
+        <input id="api-key-input" type="text" placeholder="Pega tu clave de API de la NASA aquí">
+        <button id="load-neos-btn">Cargar NEOs Recientes</button>
+      </div>
+      <div id="status-message"></div>
+      <hr style="border:none; border-top:1px solid var(--border-color); margin: 16px 0;"/>
+      <div class="row">
+        <label>Velocidad</label>
+        <button class="time-btn" data-scale="1">1x</button>
+        <button class="time-btn" data-scale="5">5x</button>
+        <button class="time-btn" data-scale="10">10x</button>
+        <button class="time-btn" data-scale="20">20x</button>
+        <button class="time-btn" data-scale="100">100x</button>
+      </div>
+      <div class="row">
+        <label>Control</label>
+        <button id="resume-btn" title="Reanudar">▶</button>
+        <button id="pause-btn" title="Pausar">||</button>
+      </div>
+      <div class="row">
+        <label for="date-picker">Ir a Fecha</label>
+        <input type="date" id="date-picker">
+        <button id="go-to-date-btn">Ir</button>
+      </div>
+      <div class="row">
+          <label for="neo-selector">Ir a NEO</label>
+          <select id="neo-selector">
+              <option value="">Selecciona un NEO</option>
+          </select>
+          <button id="go-to-neo-btn">Ir</button>
+      </div>
     </div>
   </div>
   <div id="info-panel" class="ui-panel hidden">
@@ -171,7 +143,6 @@
   </div>
   <div id="impact-alert"></div>
 
-  <!-- *** NUEVO: Contenido del Pop-up *** -->
   <div id="human-risk-popup-overlay" class="popup-overlay">
     <div class="popup-content">
       <button class="popup-close-btn">&times;</button>
@@ -440,6 +411,7 @@ function addNeoToScene(neoData, size) {
 // DATOS CURADOS Y CONEXIÓN CON LA API
 // =============================================================================
 const curatedNeosData = [
+    // *** CAMBIO: Fechas de impacto ajustadas para ser antes de 2075 ***
     { id: "Eros", name: "433 Eros", diameter_km: 16.8, material: "S-type (rocoso)", velocity_kms: 5.5, mass_kg: 6.687e15, close_approach_au: 0.1498, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "24/01/2056", orbital_data: { semi_major_axis: "1.458", eccentricity: "0.223", inclination: "10.829", ascending_node_longitude: "304.3", perihelion_argument: "178.6", mean_anomaly: "212.8", epoch_date_osculation: "2023-01-01T00:00:00Z" } },
     { id: "Albert", name: "719 Albert", diameter_km: 2.5, material: "S-like (rocoso)", velocity_kms: 18.38, mass_kg: 2e13, close_approach_au: 0.205, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "2.633", eccentricity: "0.548", inclination: "11.57", ascending_node_longitude: "183.85", perihelion_argument: "155.8", mean_anomaly: "16.9", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Alinda", name: "887 Alinda", diameter_km: 4, material: "S-type (rocoso)", velocity_kms: 18.94, mass_kg: 1e14, close_approach_au: 0.095, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "2.475", eccentricity: "0.567", inclination: "9.39", ascending_node_longitude: "110.6", perihelion_argument: "350.1", mean_anomaly: "11.3", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
@@ -447,18 +419,18 @@ const curatedNeosData = [
     { id: "Amor", name: "1221 Amor", diameter_km: 1.5, material: "S-type (silicáceo)", velocity_kms: 14.5, mass_kg: 2e12, close_approach_au: 0.1069, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "1.919", eccentricity: "0.435", inclination: "11.88", ascending_node_longitude: "171.3", perihelion_argument: "26.4", mean_anomaly: "357.2", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Icarus", name: "1566 Icarus", diameter_km: 1.2, material: "S-type (rocoso)", velocity_kms: 21.3, mass_kg: 3.9e12, close_approach_au: 0.04248, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "11/06/2068", orbital_data: { semi_major_axis: "1.078", eccentricity: "0.827", inclination: "22.84", ascending_node_longitude: "88.0", perihelion_argument: "31.2", mean_anomaly: "176.4", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Betulia", name: "1580 Betulia", diameter_km: 4.2, material: "C-type (oscuro)", velocity_kms: 20.1, mass_kg: 2e14, close_approach_au: 0.0406, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "2.196", eccentricity: "0.489", inclination: "52.08", ascending_node_longitude: "62.2", perihelion_argument: "159.4", mean_anomaly: "339.3", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
-    { id: "Geographos", name: "1620 Geographos", diameter_km: 2.55, material: "S-type (rocoso)", velocity_kms: 25.2, mass_kg: 2.4e13, close_approach_au: 0.0301, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "25/08/2088", orbital_data: { semi_major_axis: "1.245", eccentricity: "0.335", inclination: "13.33", ascending_node_longitude: "337.2", perihelion_argument: "276.8", mean_anomaly: "3.9", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
+    { id: "Geographos", name: "1620 Geographos", diameter_km: 2.55, material: "S-type (rocoso)", velocity_kms: 25.2, mass_kg: 2.4e13, close_approach_au: 0.0301, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "15/05/2065", orbital_data: { semi_major_axis: "1.245", eccentricity: "0.335", inclination: "13.33", ascending_node_longitude: "337.2", perihelion_argument: "276.8", mean_anomaly: "3.9", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Ivar", name: "1627 Ivar", diameter_km: 7.75, material: "S-type (silicáceo)", velocity_kms: 22.6, mass_kg: 8e14, close_approach_au: 0.110963, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "1.863", eccentricity: "0.397", inclination: "8.45", ascending_node_longitude: "132.8", perihelion_argument: "169.6", mean_anomaly: "350.1", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Toro", name: "1685 Toro", diameter_km: 3.5, material: "S-type (silicáceo)", velocity_kms: 24.4, mass_kg: 5.6e13, close_approach_au: 0.0520, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "08/08/2045", orbital_data: { semi_major_axis: "1.367", eccentricity: "0.436", inclination: "9.38", ascending_node_longitude: "274.4", perihelion_argument: "127.1", mean_anomaly: "31.2", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
-    { id: "Apollo", name: "1862 Apollo", diameter_km: 1.5, material: "Q-type", velocity_kms: 20.0, mass_kg: 4e12, close_approach_au: 0.025, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "28/05/2075", orbital_data: { semi_major_axis: "1.470", eccentricity: "0.560", inclination: "6.35", ascending_node_longitude: "35.8", perihelion_argument: "285.7", mean_anomaly: "356.9", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
+    { id: "Apollo", name: "1862 Apollo", diameter_km: 1.5, material: "Q-type", velocity_kms: 20.0, mass_kg: 4e12, close_approach_au: 0.025, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "10/11/2070", orbital_data: { semi_major_axis: "1.470", eccentricity: "0.560", inclination: "6.35", ascending_node_longitude: "35.8", perihelion_argument: "285.7", mean_anomaly: "356.9", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Antinous", name: "1863 Antinous", diameter_km: 2.1, material: "S-type", velocity_kms: 19.0, mass_kg: 1.2e13, close_approach_au: 0.2, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "2.259", eccentricity: "0.606", inclination: "18.39", ascending_node_longitude: "346.4", perihelion_argument: "247.1", mean_anomaly: "349.8", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
-    { id: "Daedalus", name: "1864 Daedalus", diameter_km: 3.0, material: "S-type", velocity_kms: 25.0, mass_kg: 3e13, close_approach_au: 0.03, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "10/03/2067", orbital_data: { semi_major_axis: "1.461", eccentricity: "0.614", inclination: "22.19", ascending_node_longitude: "11.0", perihelion_argument: "325.5", mean_anomaly: "349.6", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
+    { id: "Daedalus", name: "1864 Daedalus", diameter_km: 3.0, material: "S-type", velocity_kms: 25.0, mass_kg: 3e13, close_approach_au: 0.03, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "20/06/2059", orbital_data: { semi_major_axis: "1.461", eccentricity: "0.614", inclination: "22.19", ascending_node_longitude: "11.0", perihelion_argument: "325.5", mean_anomaly: "349.6", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Cerberus", name: "1865 Cerberus", diameter_km: 1.2, material: "S-type", velocity_kms: 22.0, mass_kg: 2.5e12, close_approach_au: 0.1, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, orbital_data: { semi_major_axis: "1.080", eccentricity: "0.467", inclination: "16.09", ascending_node_longitude: "195.1", perihelion_argument: "325.1", mean_anomaly: "1.4", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Sisyphus", name: "1866 Sisyphus", diameter_km: 8.5, material: "S-type", velocity_kms: 15.0, mass_kg: 8e14, close_approach_au: 0.15, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "24/11/2071", orbital_data: { semi_major_axis: "1.894", eccentricity: "0.538", inclination: "41.19", ascending_node_longitude: "63.6", perihelion_argument: "292.9", mean_anomaly: "353.3", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Quetzalcoatl", name: "1915 Quetzalcoatl", diameter_km: 0.5, material: "SMASS-type", velocity_kms: 21.0, mass_kg: 2e11, close_approach_au: 0.1, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "2.541", eccentricity: "0.571", inclination: "20.42", ascending_node_longitude: "272.0", perihelion_argument: "110.0", mean_anomaly: "356.9", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Boreas", name: "1916 Boreas", diameter_km: 3.5, material: "S-type", velocity_kms: 18.0, mass_kg: 5e13, close_approach_au: 0.06, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "2.273", eccentricity: "0.449", inclination: "12.87", ascending_node_longitude: "340.7", perihelion_argument: "336.1", mean_anomaly: "358.8", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Cuyo", name: "1917 Cuyo", diameter_km: 2.3, material: "S-type", velocity_kms: 19.5, mass_kg: 1.5e13, close_approach_au: 0.08, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "2.150", eccentricity: "0.505", inclination: "23.94", ascending_node_longitude: "199.7", perihelion_argument: "164.9", mean_anomaly: "353.9", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
-    { id: "Anteros", name: "1943 Anteros", diameter_km: 2.3, material: "S-type", velocity_kms: 15.0, mass_kg: 1.5e13, close_approach_au: 0.05, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "17/09/2091", orbital_data: { semi_major_axis: "1.430", eccentricity: "0.256", inclination: "8.70", ascending_node_longitude: "246.7", perihelion_argument: "299.1", mean_anomaly: "358.4", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
+    { id: "Anteros", name: "1943 Anteros", diameter_km: 2.3, material: "S-type", velocity_kms: 15.0, mass_kg: 1.5e13, close_approach_au: 0.05, orbiting_body: "Sol", is_potentially_hazardous_asteroid: true, predictedImpactDate: "05/12/2074", orbital_data: { semi_major_axis: "1.430", eccentricity: "0.256", inclination: "8.70", ascending_node_longitude: "246.7", perihelion_argument: "299.1", mean_anomaly: "358.4", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
     { id: "Tezcatlipoca", name: "1980 Tezcatlipoca", diameter_km: 4.8, material: "S-type", velocity_kms: 17.0, mass_kg: 1.5e14, close_approach_au: 0.09, orbiting_body: "Sol", is_potentially_hazardous_asteroid: false, orbital_data: { semi_major_axis: "1.709", eccentricity: "0.365", inclination: "26.84", ascending_node_longitude: "223.7", perihelion_argument: "118.5", mean_anomaly: "356.2", epoch_date_osculation: "2024-11-10T00:00:00Z" } },
 ];
 
@@ -517,6 +489,8 @@ const goToDateBtn = document.getElementById('go-to-date-btn');
 const goToNeoBtn = document.getElementById('go-to-neo-btn');
 const riskBtn = document.getElementById('risk-btn');
 const statusMessage = document.getElementById('status-message');
+const menuToggleBtn = document.getElementById('menu-toggle-btn');
+const controlsPanel = document.getElementById('controls-panel');
 
 function updatePauseButtons(isPaused) {
     pauseBtn.disabled = isPaused;
@@ -551,7 +525,6 @@ resumeBtn.addEventListener('click', () => {
   updatePauseButtons(false);
 });
 
-// *** CAMBIO: Lógica del botón "Riesgo Humano" para abrir el pop-up ***
 const humanRiskPopup = document.getElementById('human-risk-popup-overlay');
 const popupCloseBtn = humanRiskPopup.querySelector('.popup-close-btn');
 
@@ -608,6 +581,10 @@ goToNeoBtn.addEventListener('click', () => {
         }
         zoomToNeo();
     }
+});
+
+menuToggleBtn.addEventListener('click', () => {
+    controlsPanel.classList.toggle('expanded');
 });
 
 const raycaster = new THREE.Raycaster();
